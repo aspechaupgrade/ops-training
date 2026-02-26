@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upgrade Training - Web Chat</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .container {
+      background: white;
+      padding: 40px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #5D0085;
+    }
+    .info {
+      background: #E8F5E6;
+      border-left: 4px solid #0E680E;
+      padding: 15px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎓 Upgrade Training - Web Chat</h1>
+    <p>This is a test page for training new agents on web messaging.</p>
+    
+    <div class="info">
+      <strong>Instructions:</strong>
+      <ol>
+        <li>Click the chat widget in the bottom right corner</li>
+        <li>Send a test message</li>
+        <li>Accept the interaction in Genesys Cloud</li>
+        <li>The screen pop will show purple theme with test data</li>
+      </ol>
+    </div>
+    
+    <p><strong>Test Account ID:</strong> TEST123456</p>
+    <p><strong>Screen Pop Color:</strong> Purple (Web Message)</p>
+  </div>
+
+  <!-- Genesys Messenger Widget -->
+  <script type="text/javascript" charset="utf-8">
+    (function (g, e, n, es, ys) {
+      g['_genesysJs'] = e;
+      g[e] = g[e] || function () {
+        (g[e].q = g[e].q || []).push(arguments)
+      };
+      g[e].t = 1 * new Date();
+      g[e].c = es;
+      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+    })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
+      environment: 'prod-usw2',
+      deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
+    });
+  </script>
+</body>
+</html>
