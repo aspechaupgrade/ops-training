@@ -54,44 +54,22 @@
     
     <p><strong>Test Account ID:</strong> TEST123456</p>
     <p><strong>Screen Pop Color:</strong> Purple (Web Message)</p>
-
-    <div class="debug" id="debug">
-      <strong>Debug Info:</strong><br>
-      Waiting for Genesys to load...
-    </div>
-
-    <button onclick="openMessenger()" style="padding: 10px 20px; background: #5D0085; color: white; border: none; border-radius: 4px; cursor: pointer;">
-      🗨️ Open Chat (Manual Trigger)
-    </button>
   </div>
 
   <!-- Genesys Messenger Widget -->
-  <script type="text/javascript" charset="utf-8">
-    (function (g, e, n, es, ys) {
-      g['_genesysJs'] = e;
-      g[e] = g[e] || function () {
-        (g[e].q = g[e].q || []).push(arguments)
-      };
-      g[e].t = 1 * new Date();
-      g[e].c = es;
-      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
-    })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
-      environment: 'prod-usw2',
-      deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
-    });
-
-    // Debug and manual trigger
-    Genesys("subscribe", "Messenger.ready", function(){
-      console.log("✅ Genesys Messenger is ready!");
-      document.getElementById('debug').innerHTML = '<strong>Debug Info:</strong><br>✅ Genesys Messenger loaded successfully!<br>Deployment ID: 4dfa951d-eb9f-4514-acb8-8c140608f5a2';
-      
-      // Try to show the launcher
-      Genesys("command", "Messenger.show", {});
-    });
-
-    function openMessenger() {
-      Genesys("command", "Messenger.open", {});
-    }
-  </script>
+<script type="text/javascript" charset="utf-8">
+  (function (g, e, n, es, ys) {
+    g['_genesysJs'] = e;
+    g[e] = g[e] || function () {
+      (g[e].q = g[e].q || []).push(arguments)
+    };
+    g[e].t = 1 * new Date();
+    g[e].c = es;
+    ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+  })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
+    environment: 'prod-usw2',
+    deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
+  });
+</script>
 </body>
 </html>
