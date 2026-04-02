@@ -32,9 +32,9 @@
       align-items: center;
       gap: 10px;
     }
-    .voice-header { background: #1a3c6e; }
-    .chat-header { background: #0E680E; }
-    .email-header { background: #7a3800; }
+    .voice-header { background: #0E680E; }
+    .chat-header { background: #FFBF00; }
+    .email-header { background: #1a3c6e; }
     .channel-body { padding: 20px; }
     .steps { margin: 0; padding-left: 20px; line-height: 2; }
     .scenarios {
@@ -171,14 +171,13 @@
     <div class="channel-body">
       <ol class="steps">
         <li>Click the chat widget in the <strong>bottom-right corner</strong> of this page</li>
-        <li>Start a conversation — the bot will send a scenario menu</li>
-        <li>Reply with <strong>1, 2, 3, or 4</strong> to select your scenario</li>
+        <li>Send <strong>1, 2, 3, or 4</strong> as your opening message to select your scenario</li>
         <li>Accept the chat in Genesys Cloud and verify the screen pop</li>
       </ol>
       <table class="scenarios">
         <thead>
           <tr>
-            <th>Reply</th>
+            <th>Message</th>
             <th>Scenario</th>
             <th>Theme</th>
             <th>Auth</th>
@@ -216,9 +215,6 @@
           </tr>
         </tbody>
       </table>
-      <div class="note">
-        If the bot doesn't respond after your first message, the chat flow may not be published yet. Contact your trainer.
-      </div>
     </div>
   </div>
 
