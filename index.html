@@ -3,73 +3,298 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upgrade Training - Web Chat</title>
+  <title>Ops Training Sandbox</title>
   <style>
+    * { box-sizing: border-box; }
     body {
       font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 50px auto;
+      max-width: 900px;
+      margin: 40px auto;
       padding: 20px;
-      background: #f5f5f5;
+      background: #f0f0f0;
+      color: #222;
     }
-    .container {
+    h1 { color: #5D0085; margin-bottom: 4px; }
+    .subtitle { color: #666; margin-top: 0; margin-bottom: 32px; font-size: 15px; }
+    .channel-card {
       background: white;
-      padding: 40px;
       border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 24px;
+      overflow: hidden;
     }
-    h1 {
-      color: #5D0085;
+    .channel-header {
+      padding: 14px 20px;
+      font-weight: bold;
+      font-size: 16px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .info {
-      background: #E8F5E6;
-      border-left: 4px solid #0E680E;
-      padding: 15px;
-      margin: 20px 0;
+    .voice-header { background: #1a3c6e; }
+    .chat-header { background: #0E680E; }
+    .email-header { background: #7a3800; }
+    .channel-body { padding: 20px; }
+    .steps { margin: 0; padding-left: 20px; line-height: 2; }
+    .scenarios {
+      margin-top: 16px;
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 14px;
     }
-    .debug {
-      background: #FFF3CD;
-      border-left: 4px solid #FFC107;
-      padding: 15px;
-      margin: 20px 0;
-      font-family: monospace;
+    .scenarios th {
+      background: #f5f5f5;
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 2px solid #ddd;
+    }
+    .scenarios td {
+      padding: 7px 12px;
+      border-bottom: 1px solid #eee;
+      vertical-align: top;
+    }
+    .scenarios tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
       font-size: 12px;
+      font-weight: bold;
+      color: white;
+    }
+    .badge-green { background: #0E680E; }
+    .badge-red { background: #B52518; }
+    .note {
+      background: #fff8e1;
+      border-left: 4px solid #f0a500;
+      padding: 12px 16px;
+      margin-top: 16px;
+      font-size: 14px;
+      border-radius: 0 4px 4px 0;
+    }
+    .contact-info {
+      background: #e8f0fe;
+      border-left: 4px solid #1a73e8;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      border-radius: 0 4px 4px 0;
+    }
+    .contact-info strong { display: block; margin-bottom: 4px; }
+    code {
+      background: #f5f5f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      font-size: 13px;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎓 Upgrade Training - Web Chat</h1>
-    <p>This is a test page for training new agents on web messaging.</p>
-    
-    <div class="info">
-      <strong>Instructions:</strong>
-      <ol>
-        <li>Click the chat widget in the bottom right corner (it may take a second to load)</li>
-        <li>Send a test message</li>
-        <li>Accept the interaction in Genesys Cloud</li>
-        <li>The screen pop will show purple theme with test data</li>
-      </ol>
+  <h1>Ops Training Sandbox</h1>
+  <p class="subtitle">Scenario-based training environment — each channel routes to a configurable screen pop</p>
+
+  <div class="contact-info">
+    <strong>Training Contact Info</strong>
+    Voice: <code>+1 (213) 224-0991</code> &nbsp;|&nbsp;
+    Email: <code>OpsSandbox@upgrade.pure.cloud</code> &nbsp;|&nbsp;
+    Chat: use the widget below (bottom-right corner)
+  </div>
+
+  <!-- VOICE -->
+  <div class="channel-card">
+    <div class="channel-header voice-header">
+      <span>&#128222;</span> Voice
     </div>
-    
-    <p><strong>Test Account ID:</strong> TEST123456</p>
-    <p><strong>Screen Pop Color:</strong> Purple (Web Message)</p>
+    <div class="channel-body">
+      <ol class="steps">
+        <li>Call <code>+1 (213) 224-0991</code></li>
+        <li>Listen to the menu and press <strong>1, 2, 3, or 4</strong> for your scenario</li>
+        <li>Accept the call in Genesys Cloud</li>
+        <li>Verify the screen pop matches the scenario below</li>
+      </ol>
+      <table class="scenarios">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Scenario</th>
+            <th>Theme</th>
+            <th>Auth</th>
+            <th>Account ID</th>
+            <th>Mini Miranda</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>Authenticated Premium Customer</td>
+            <td><span class="badge badge-green">Green</span></td>
+            <td>Authenticated</td>
+            <td>123456789</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>Unauthenticated / Multiple Accounts</td>
+            <td><span class="badge badge-red">Red</span></td>
+            <td>Auth Failed</td>
+            <td>Multiple</td>
+            <td>No</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>Collections (Mini Miranda)</td>
+            <td><span class="badge badge-green">Green</span></td>
+            <td>Authenticated</td>
+            <td>987654321</td>
+            <td><strong>Yes</strong></td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>Offer Page</td>
+            <td><span class="badge badge-red">Red</span></td>
+            <td>Auth Failed</td>
+            <td>No open accounts</td>
+            <td>No</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="channel-card">
+    <div class="channel-header chat-header">
+      <span>&#128172;</span> Web Chat
+    </div>
+    <div class="channel-body">
+      <ol class="steps">
+        <li>Click the chat widget in the <strong>bottom-right corner</strong> of this page</li>
+        <li>Start a conversation — the bot will send a scenario menu</li>
+        <li>Reply with <strong>1, 2, 3, or 4</strong> to select your scenario</li>
+        <li>Accept the chat in Genesys Cloud and verify the screen pop</li>
+      </ol>
+      <table class="scenarios">
+        <thead>
+          <tr>
+            <th>Reply</th>
+            <th>Scenario</th>
+            <th>Theme</th>
+            <th>Auth</th>
+            <th>Account ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1</strong></td>
+            <td>Authenticated Premium Customer</td>
+            <td><span class="badge badge-green">Green</span></td>
+            <td>Authenticated</td>
+            <td>123456789</td>
+          </tr>
+          <tr>
+            <td><strong>2</strong></td>
+            <td>Unauthenticated / Multiple Accounts</td>
+            <td><span class="badge badge-red">Red</span></td>
+            <td>Auth Failed</td>
+            <td>Multiple</td>
+          </tr>
+          <tr>
+            <td><strong>3</strong></td>
+            <td>Collections (Mini Miranda)</td>
+            <td><span class="badge badge-green">Green</span></td>
+            <td>Authenticated</td>
+            <td>987654321</td>
+          </tr>
+          <tr>
+            <td><strong>4</strong></td>
+            <td>Offer Page</td>
+            <td><span class="badge badge-red">Red</span></td>
+            <td>Auth Failed</td>
+            <td>No open accounts</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        If the bot doesn't respond after your first message, the chat flow may not be published yet. Contact your trainer.
+      </div>
+    </div>
+  </div>
+
+  <!-- EMAIL -->
+  <div class="channel-card">
+    <div class="channel-header email-header">
+      <span>&#9993;</span> Email
+    </div>
+    <div class="channel-body">
+      <ol class="steps">
+        <li>Send an email to <code>OpsSandbox@upgrade.pure.cloud</code></li>
+        <li>Include <strong>S1, S2, S3, or S4</strong> anywhere in the subject line</li>
+        <li>Body content doesn't matter — the flow reads the subject only</li>
+        <li>Accept the email in Genesys Cloud and verify the screen pop</li>
+      </ol>
+      <table class="scenarios">
+        <thead>
+          <tr>
+            <th>Subject keyword</th>
+            <th>Scenario</th>
+            <th>Theme</th>
+            <th>Auth</th>
+            <th>Account ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>S1</code></td>
+            <td>Authenticated Premium Customer</td>
+            <td><span class="badge badge-green">Green</span></td>
+            <td>Authenticated</td>
+            <td>123456789</td>
+          </tr>
+          <tr>
+            <td><code>S2</code></td>
+            <td>Unauthenticated / Multiple Accounts</td>
+            <td><span class="badge badge-red">Red</span></td>
+            <td>Auth Failed</td>
+            <td>Multiple</td>
+          </tr>
+          <tr>
+            <td><code>S3</code></td>
+            <td>Collections (Mini Miranda)</td>
+            <td><span class="badge badge-green">Green</span></td>
+            <td>Authenticated</td>
+            <td>987654321</td>
+          </tr>
+          <tr>
+            <td><code>S4</code></td>
+            <td>Offer Page</td>
+            <td><span class="badge badge-red">Red</span></td>
+            <td>Auth Failed</td>
+            <td>No open accounts</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="note">
+        Example subjects: <code>Training S1</code> &nbsp;|&nbsp; <code>[S2] test run</code> &nbsp;|&nbsp; <code>S3 - collections scenario</code>
+      </div>
+    </div>
   </div>
 
   <!-- Genesys Messenger Widget -->
-<script type="text/javascript" charset="utf-8">
-  (function (g, e, n, es, ys) {
-    g['_genesysJs'] = e;
-    g[e] = g[e] || function () {
-      (g[e].q = g[e].q || []).push(arguments)
-    };
-    g[e].t = 1 * new Date();
-    g[e].c = es;
-    ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
-  })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
-    environment: 'prod-usw2',
-    deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
-  });
-</script>
+  <script type="text/javascript" charset="utf-8">
+    (function (g, e, n, es, ys) {
+      g['_genesysJs'] = e;
+      g[e] = g[e] || function () {
+        (g[e].q = g[e].q || []).push(arguments)
+      };
+      g[e].t = 1 * new Date();
+      g[e].c = es;
+      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+    })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
+      environment: 'prod-usw2',
+      deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
+    });
+  </script>
 </body>
 </html>
