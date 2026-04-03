@@ -151,7 +151,7 @@
     .qt-action:hover:not(:disabled) { opacity: 0.88; }
     .qt-action:disabled { opacity: 0.45; cursor: not-allowed; }
     .qt-action-voice { background: #0E680E; }
-    .qt-action-chat  { background: #c49a00; color: #fff; }
+    .qt-action-chat  { background: #FFBF00; color: #222; }
     .qt-action-email { background: #1a3c6e; }
     .qt-status {
       margin-top: 8px;
@@ -173,24 +173,24 @@
   <h1>Ops Training Sandbox</h1>
   <p class="subtitle">Scenario-based training environment — each channel routes to a configurable screen pop</p>
 
-  <div class="contact-info">
-    <strong>Training Contact Info</strong>
-    Voice: <code>+1 (213) 224-0991</code> &nbsp;|&nbsp;
-    Email: <code>OpsTraining@upgrade.pure.cloud</code> &nbsp;|&nbsp;
-    Chat: use the widget below (bottom-right corner)
-  </div>
-
   <!-- CHAT -->
   <div class="channel-card">
     <div class="channel-header chat-header">
       <span>&#128172;</span> Web Chat
     </div>
     <div class="channel-body">
-      <ol class="steps">
-        <li>Click the chat widget in the <strong>bottom-right corner</strong> of this page</li>
-        <li>Send <strong>1, 2, 3, or 4</strong> as your opening message to select your scenario</li>
-        <li>Accept the chat in Genesys Cloud and verify the screen pop</li>
-      </ol>
+      <div class="qt-label">Quick Test</div>
+      <div class="qt-row">
+        <div class="qt-pills" id="chat-pills">
+          <button class="qt-pill sel-chat" onclick="selectChat(1)">S1</button>
+          <button class="qt-pill" onclick="selectChat(2)">S2</button>
+          <button class="qt-pill" onclick="selectChat(3)">S3</button>
+          <button class="qt-pill" onclick="selectChat(4)">S4</button>
+        </div>
+        <button class="qt-action qt-action-chat" id="chat-btn" onclick="launchChatTest()">&#128172; Open Chat</button>
+      </div>
+      <div id="chat-status" class="qt-status"></div>
+      <div class="qt-hint">Opens the chat widget and sends your scenario number automatically — no typing needed.</div>
       <table class="scenarios">
         <thead>
           <tr>
@@ -232,20 +232,13 @@
           </tr>
         </tbody>
       </table>
-
       <hr class="qt-divider">
-      <div class="qt-label">Quick Test</div>
-      <div class="qt-row">
-        <div class="qt-pills" id="chat-pills">
-          <button class="qt-pill sel-chat" onclick="selectChat(1)">S1</button>
-          <button class="qt-pill" onclick="selectChat(2)">S2</button>
-          <button class="qt-pill" onclick="selectChat(3)">S3</button>
-          <button class="qt-pill" onclick="selectChat(4)">S4</button>
-        </div>
-        <button class="qt-action qt-action-chat" id="chat-btn" onclick="launchChatTest()">&#128172; Open Chat</button>
-      </div>
-      <div id="chat-status" class="qt-status"></div>
-      <div class="qt-hint">Opens the chat widget and sends your scenario number automatically — no typing needed.</div>
+      <div class="qt-label">Manual Steps</div>
+      <ol class="steps">
+        <li>Click the chat widget in the <strong>bottom-right corner</strong> of this page</li>
+        <li>Send <strong>1, 2, 3, or 4</strong> as your opening message to select your scenario</li>
+        <li>Accept the chat in Genesys Cloud and verify the screen pop</li>
+      </ol>
     </div>
   </div>
 
@@ -255,12 +248,18 @@
       <span>&#128222;</span> Voice
     </div>
     <div class="channel-body">
-      <ol class="steps">
-        <li>Call <code>+1 (213) 224-0991</code></li>
-        <li>Listen to the menu and press <strong>1, 2, 3, or 4</strong> for your scenario</li>
-        <li>Accept the call in Genesys Cloud</li>
-        <li>Verify the screen pop matches the scenario below</li>
-      </ol>
+      <div class="qt-label">Quick Test</div>
+      <div class="qt-row">
+        <div class="qt-pills" id="voice-pills">
+          <button class="qt-pill sel-voice" onclick="selectVoice(1)">S1</button>
+          <button class="qt-pill" onclick="selectVoice(2)">S2</button>
+          <button class="qt-pill" onclick="selectVoice(3)">S3</button>
+          <button class="qt-pill" onclick="selectVoice(4)">S4</button>
+        </div>
+        <button class="qt-action qt-action-voice" id="voice-btn" onclick="launchVoiceTest()">&#128222; Start Voice Test</button>
+      </div>
+      <div id="voice-status" class="qt-status"></div>
+      <div class="qt-hint">Your Genesys station dials the training number &amp; sends DTMF automatically. Have a trainee accept the call from the queue.</div>
       <table class="scenarios">
         <thead>
           <tr>
@@ -307,20 +306,14 @@
           </tr>
         </tbody>
       </table>
-
       <hr class="qt-divider">
-      <div class="qt-label">Quick Test</div>
-      <div class="qt-row">
-        <div class="qt-pills" id="voice-pills">
-          <button class="qt-pill sel-voice" onclick="selectVoice(1)">S1</button>
-          <button class="qt-pill" onclick="selectVoice(2)">S2</button>
-          <button class="qt-pill" onclick="selectVoice(3)">S3</button>
-          <button class="qt-pill" onclick="selectVoice(4)">S4</button>
-        </div>
-        <button class="qt-action qt-action-voice" id="voice-btn" onclick="launchVoiceTest()">&#128222; Start Voice Test</button>
-      </div>
-      <div id="voice-status" class="qt-status"></div>
-      <div class="qt-hint">Your Genesys station dials the training number &amp; sends DTMF automatically. Have a trainee accept the call from the queue.</div>
+      <div class="qt-label">Manual Steps</div>
+      <ol class="steps">
+        <li>Call <code>+1 (213) 224-0991</code></li>
+        <li>Listen to the menu and press <strong>1, 2, 3, or 4</strong> for your scenario</li>
+        <li>Accept the call in Genesys Cloud</li>
+        <li>Verify the screen pop matches the scenario below</li>
+      </ol>
     </div>
   </div>
 
@@ -330,12 +323,18 @@
       <span>&#9993;</span> Email
     </div>
     <div class="channel-body">
-      <ol class="steps">
-        <li>Send an email to <code>OpsTraining@upgrade.pure.cloud</code></li>
-        <li>Include <strong>S1, S2, S3, or S4</strong> anywhere in the subject line</li>
-        <li>Body content doesn't matter — the flow reads the subject only</li>
-        <li>Accept the email in Genesys Cloud and verify the screen pop</li>
-      </ol>
+      <div class="qt-label">Quick Test</div>
+      <div class="qt-row">
+        <div class="qt-pills" id="email-pills">
+          <button class="qt-pill sel-email" onclick="selectEmail(1)">S1</button>
+          <button class="qt-pill" onclick="selectEmail(2)">S2</button>
+          <button class="qt-pill" onclick="selectEmail(3)">S3</button>
+          <button class="qt-pill" onclick="selectEmail(4)">S4</button>
+        </div>
+        <button class="qt-action qt-action-email" id="email-btn" onclick="launchEmailTest()">&#9993; Send Test Email</button>
+      </div>
+      <div id="email-status" class="qt-status"></div>
+      <div class="qt-hint">Creates an inbound email interaction directly in the Training - Email queue. No Gmail needed.</div>
       <table class="scenarios">
         <thead>
           <tr>
@@ -377,23 +376,17 @@
           </tr>
         </tbody>
       </table>
+      <hr class="qt-divider">
+      <div class="qt-label">Manual Steps</div>
+      <ol class="steps">
+        <li>Send an email to <code>OpsTraining@upgrade.pure.cloud</code></li>
+        <li>Include <strong>S1, S2, S3, or S4</strong> anywhere in the subject line</li>
+        <li>Body content doesn't matter — the flow reads the subject only</li>
+        <li>Accept the email in Genesys Cloud and verify the screen pop</li>
+      </ol>
       <div class="note">
         Example subjects: <code>Training S1</code> &nbsp;|&nbsp; <code>[S2] test run</code> &nbsp;|&nbsp; <code>S3 - collections scenario</code>
       </div>
-
-      <hr class="qt-divider">
-      <div class="qt-label">Quick Test</div>
-      <div class="qt-row">
-        <div class="qt-pills" id="email-pills">
-          <button class="qt-pill sel-email" onclick="selectEmail(1)">S1</button>
-          <button class="qt-pill" onclick="selectEmail(2)">S2</button>
-          <button class="qt-pill" onclick="selectEmail(3)">S3</button>
-          <button class="qt-pill" onclick="selectEmail(4)">S4</button>
-        </div>
-        <button class="qt-action qt-action-email" id="email-btn" onclick="launchEmailTest()">&#9993; Send Test Email</button>
-      </div>
-      <div id="email-status" class="qt-status"></div>
-      <div class="qt-hint">Creates an inbound email interaction directly in the Training - Email queue. No Gmail needed.</div>
     </div>
   </div>
 
@@ -460,16 +453,25 @@
       var _token        = null;
 
       // ── Auth — SDK implicit grant, token cached in localStorage ──────────────
-      var _authReady = (function() {
-        var platformClient = require('platformClient');
-        var client = platformClient.ApiClient.instance;
-        client.setEnvironment(platformClient.PureCloudRegionHosts.us_east_1);
-        client.setPersistSettings(true, 'training_app');
-        return client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
-          .then(function(data) { _token = data.accessToken; });
-      })();
+      var _authReady = null;
 
       async function ensureAuth() {
+        if (_token) return;
+        if (!_authReady) {
+          var platformClient = require('platformClient');
+          var client = platformClient.ApiClient.instance;
+          client.setEnvironment(platformClient.PureCloudRegionHosts.us_east_1);
+          client.setPersistSettings(true, 'training_app');
+          _authReady = Promise.race([
+            client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
+              .then(function(data) { _token = data.accessToken; }),
+            new Promise(function(_, reject) {
+              setTimeout(function() {
+                reject(new Error('Auth timed out — reload the app and try again.'));
+              }, 10000);
+            })
+          ]);
+        }
         await _authReady;
       }
 
@@ -564,6 +566,7 @@
 
       async function launchVoiceTest() {
         setBtnState('voice-btn', true, '&#9203; Connecting...');
+        setStatus('voice-status', 'Authenticating...', 'loading');
         try {
           await ensureAuth();
         } catch(e) {
@@ -642,6 +645,7 @@
 
       async function launchEmailTest() {
         setBtnState('email-btn', true, '&#9203; Connecting...');
+        setStatus('email-status', 'Authenticating...', 'loading');
         try {
           await ensureAuth();
         } catch(e) {
