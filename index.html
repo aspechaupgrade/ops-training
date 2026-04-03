@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <style>html { display: none; }</style>
   <script>
     (function() {
       var inIframe = window.self !== window.top;
-      var genesysRef = document.referrer && document.referrer.indexOf('.pure.cloud') !== -1;
-      if (!inIframe || !genesysRef) {
-        document.documentElement.innerHTML = '';
+      var fromGenesys = document.referrer.indexOf('.pure.cloud') !== -1;
+      if (inIframe && fromGenesys) {
+        document.documentElement.style.display = '';
       }
     })();
   </script>
