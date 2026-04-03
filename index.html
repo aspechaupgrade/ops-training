@@ -4,9 +4,11 @@
   <style>html { display: none; }</style>
   <script>
     (function() {
-      var inIframe = window.self !== window.top;
-      var fromGenesys = document.referrer.indexOf('.pure.cloud') !== -1;
-      if (inIframe && fromGenesys) {
+      try {
+        if (window.self !== window.top) {
+          document.documentElement.style.display = '';
+        }
+      } catch(e) {
         document.documentElement.style.display = '';
       }
     })();
