@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <style>html { display: none; }</style>
   <script>
     (function() {
       try {
-        if (window.self !== window.top) {
-          document.documentElement.style.display = '';
+        if (window.self === window.top) {
+          document.documentElement.innerHTML = "";
+          throw new Error("blocked");
         }
       } catch(e) {
-        document.documentElement.style.display = '';
+        // cross-origin iframe throws here — that's fine, means we're iframed
       }
     })();
   </script>
