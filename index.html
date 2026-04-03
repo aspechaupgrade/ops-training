@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>
+    (function() {
+      var inIframe = window.self !== window.top;
+      var genesysRef = document.referrer && document.referrer.indexOf('.pure.cloud') !== -1;
+      if (!inIframe || !genesysRef) {
+        document.documentElement.innerHTML = '';
+      }
+    })();
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ops Training Sandbox</title>
