@@ -2,14 +2,34 @@
 <html lang="en">
 <head>
   <script>
+    // Iframe guard
     (function() {
       try {
         if (window.self === window.top) {
           document.documentElement.innerHTML = "";
           throw new Error("blocked");
         }
-      } catch(e) {
-        // cross-origin iframe throws here — that's fine, means we're iframed
+      } catch(e) {}
+    })();
+
+    // OAuth callback detection — must run before anything else.
+    // When the hidden auth iframe lands here with #access_token=..., we write
+    // the token to localStorage (same origin as parent) and skip all other init.
+    window._GC_IS_OAUTH_CB = false;
+    (function() {
+      var hash = window.location.hash;
+      if (hash && hash.indexOf('access_token=') !== -1) {
+        window._GC_IS_OAUTH_CB = true;
+        var p = new URLSearchParams(hash.slice(1));
+        var tok = p.get('access_token');
+        var exp = parseInt(p.get('expires_in') || '86400');
+        if (tok) {
+          try {
+            localStorage.setItem('gc_tok_training', JSON.stringify({
+              t: tok, e: Date.now() + exp * 1000
+            }));
+          } catch(err) {}
+        }
       }
     })();
   </script>
@@ -45,7 +65,7 @@
       gap: 10px;
     }
     .voice-header { background: #0E680E; }
-    .chat-header { background: #FFBF00; }
+    .chat-header  { background: #FFBF00; color: #222; }
     .email-header { background: #1a3c6e; }
     .channel-body { padding: 20px; }
     .steps { margin: 0; padding-left: 20px; line-height: 2; }
@@ -76,7 +96,7 @@
       color: white;
     }
     .badge-green { background: #0E680E; }
-    .badge-red { background: #B52518; }
+    .badge-red   { background: #B52518; }
     .note {
       background: #fff8e1;
       border-left: 4px solid #f0a500;
@@ -136,6 +156,7 @@
     }
     .qt-pill:hover { border-color: #bbb; color: #333; }
     .qt-pill.sel-voice { border-color: #0E680E; background: #0E680E; color: white; }
+    .qt-pill.sel-chat  { border-color: #c49a00; background: #FFBF00; color: #222; }
     .qt-pill.sel-email { border-color: #1a3c6e; background: #1a3c6e; color: white; }
     .qt-action {
       padding: 6px 18px;
@@ -150,6 +171,7 @@
     .qt-action:hover:not(:disabled) { opacity: 0.88; }
     .qt-action:disabled { opacity: 0.45; cursor: not-allowed; }
     .qt-action-voice { background: #0E680E; }
+    .qt-action-chat  { background: #c49a00; color: #fff; }
     .qt-action-email { background: #1a3c6e; }
     .qt-status {
       margin-top: 8px;
@@ -157,7 +179,7 @@
       min-height: 18px;
     }
     .qt-status.loading { color: #888; }
-    .qt-status.ok { color: #0E680E; font-weight: bold; }
+    .qt-status.ok  { color: #0E680E; font-weight: bold; }
     .qt-status.err { color: #B52518; }
     .qt-hint {
       font-size: 12px;
@@ -229,6 +251,20 @@
           </tr>
         </tbody>
       </table>
+
+      <hr class="qt-divider">
+      <div class="qt-label">Quick Test</div>
+      <div class="qt-row">
+        <div class="qt-pills" id="chat-pills">
+          <button class="qt-pill sel-chat" onclick="selectChat(1)">S1</button>
+          <button class="qt-pill" onclick="selectChat(2)">S2</button>
+          <button class="qt-pill" onclick="selectChat(3)">S3</button>
+          <button class="qt-pill" onclick="selectChat(4)">S4</button>
+        </div>
+        <button class="qt-action qt-action-chat" id="chat-btn" onclick="launchChatTest()">&#128172; Open Chat</button>
+      </div>
+      <div id="chat-status" class="qt-status"></div>
+      <div class="qt-hint">Opens the chat widget and sends your scenario number automatically — no typing needed.</div>
     </div>
   </div>
 
@@ -380,278 +416,338 @@
     </div>
   </div>
 
-  <!-- Genesys Messenger Widget -->
+  <!-- Genesys Messenger Widget — skip when page is loaded as OAuth callback iframe -->
   <script type="text/javascript" charset="utf-8">
-    (function (g, e, n, es, ys) {
-      g['_genesysJs'] = e;
-      g[e] = g[e] || function () {
-        (g[e].q = g[e].q || []).push(arguments)
-      };
-      g[e].t = 1 * new Date();
-      g[e].c = es;
-      ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
-    })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
-      environment: 'prod-usw2',
-      deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
-    });
+    if (!window._GC_IS_OAUTH_CB) {
+      (function (g, e, n, es, ys) {
+        g['_genesysJs'] = e;
+        g[e] = g[e] || function () { (g[e].q = g[e].q || []).push(arguments) };
+        g[e].t = 1 * new Date();
+        g[e].c = es;
+        ys = document.createElement('script'); ys.async = 1; ys.src = n; ys.charset = 'utf-8'; document.head.appendChild(ys);
+      })(window, 'Genesys', 'https://apps.usw2.pure.cloud/genesys-bootstrap/genesys.min.js', {
+        environment: 'prod-usw2',
+        deploymentId: '4dfa951d-eb9f-4514-acb8-8c140608f5a2'
+      });
+    }
   </script>
-
-  <!-- Platform Client SDK (handles silent OAuth via hidden iframe — no page redirect) -->
-  <script src="https://unpkg.com/purecloud-platform-client-v2@239.0.0/dist/web-cjs/bundle.js"></script>
 
   <!-- Quick Test Logic -->
   <script>
-    var CLIENT_ID    = 'acf84405-def0-4e4e-96dc-53eecf6b15b0';
-    var REDIRECT_URI = 'https://aspechaupgrade.github.io/ops-training/';
-    var API_BASE     = 'https://api.mypurecloud.com';
-    var EMAIL_QUEUE  = 'ff9f0acd-8573-4b19-8142-07bf807ca93a';
-    var VOICE_NUMBER = '+12132240991';
+    // Skip all init when running as the OAuth callback relay iframe
+    if (!window._GC_IS_OAUTH_CB) {
 
-    // Participant data for each scenario — sourced directly from Training - Email flow YAML
-    var SCENARIOS = {
-      1: {
-        label: 'Auth Premium Customer',
-        subjectKey: 'S1',
-        attrs: {
-          callerAccountID:        '123456789',
-          callerAuthenticated:    'true',
-          targetAccount:          '123456789',
-          callerVQLink:           'https://appbyphoneui.usw2.prod.upgrade.com/app-by-phone/application/123456789/personal-info',
-          primaryBackgroundColor:   '#0E680E',
-          secondaryBackgroundColor: '#E8F5E6',
-          Authentication:         'Authenticated'
+      var CLIENT_ID    = 'acf84405-def0-4e4e-96dc-53eecf6b15b0';
+      var REDIRECT_URI = 'https://aspechaupgrade.github.io/ops-training/';
+      var API_BASE     = 'https://api.mypurecloud.com';
+      var EMAIL_QUEUE  = 'ff9f0acd-8573-4b19-8142-07bf807ca93a';
+      var VOICE_NUMBER = '+12132240991';
+
+      var SCENARIOS = {
+        1: {
+          label: 'Auth Premium Customer', subjectKey: 'S1',
+          attrs: {
+            callerAccountID: '123456789', callerAuthenticated: 'true', targetAccount: '123456789',
+            callerVQLink: 'https://appbyphoneui.usw2.prod.upgrade.com/app-by-phone/application/123456789/personal-info',
+            primaryBackgroundColor: '#0E680E', secondaryBackgroundColor: '#E8F5E6', Authentication: 'Authenticated'
+          }
+        },
+        2: {
+          label: 'Unauth / Multiple Accounts', subjectKey: 'S2',
+          attrs: {
+            callerAccountID: 'Multiple', callerAuthenticated: 'false', targetAccount: '',
+            callerVQLink: '', primaryBackgroundColor: '#B52518', secondaryBackgroundColor: '#FBEAE9',
+            Authentication: 'Authentication Failed'
+          }
+        },
+        3: {
+          label: 'Collections (Mini Miranda)', subjectKey: 'S3',
+          attrs: {
+            callerAccountID: '987654321', callerAuthenticated: 'true', targetAccount: '987654321',
+            callerVQLink: 'https://appbyphoneui.usw2.prod.upgrade.com/app-by-phone/application/987654321/personal-info',
+            primaryBackgroundColor: '#0E680E', secondaryBackgroundColor: '#E8F5E6', Authentication: 'Authenticated'
+          }
+        },
+        4: {
+          label: 'Offer Page', subjectKey: 'S4',
+          attrs: {
+            callerAccountID: 'No open accounts', callerAuthenticated: 'false', targetAccount: '',
+            callerVQLink: '', primaryBackgroundColor: '#B52518', secondaryBackgroundColor: '#FBEAE9',
+            Authentication: 'Authentication Failed'
+          }
         }
-      },
-      2: {
-        label: 'Unauth / Multiple Accounts',
-        subjectKey: 'S2',
-        attrs: {
-          callerAccountID:        'Multiple',
-          callerAuthenticated:    'false',
-          targetAccount:          '',
-          callerVQLink:           '',
-          primaryBackgroundColor:   '#B52518',
-          secondaryBackgroundColor: '#FBEAE9',
-          Authentication:         'Authentication Failed'
-        }
-      },
-      3: {
-        label: 'Collections (Mini Miranda)',
-        subjectKey: 'S3',
-        attrs: {
-          callerAccountID:        '987654321',
-          callerAuthenticated:    'true',
-          targetAccount:          '987654321',
-          callerVQLink:           'https://appbyphoneui.usw2.prod.upgrade.com/app-by-phone/application/987654321/personal-info',
-          primaryBackgroundColor:   '#0E680E',
-          secondaryBackgroundColor: '#E8F5E6',
-          Authentication:         'Authenticated'
-        }
-      },
-      4: {
-        label: 'Offer Page',
-        subjectKey: 'S4',
-        attrs: {
-          callerAccountID:        'No open accounts',
-          callerAuthenticated:    'false',
-          targetAccount:          '',
-          callerVQLink:           '',
-          primaryBackgroundColor:   '#B52518',
-          secondaryBackgroundColor: '#FBEAE9',
-          Authentication:         'Authentication Failed'
-        }
-      }
-    };
+      };
 
-    var voiceScenario = 1;
-    var emailScenario = 1;
+      var voiceScenario = 1;
+      var emailScenario = 1;
+      var chatScenario  = 1;
+      var _token        = null;
+      var _authInFlight = null;
 
-    // ── Auth (Platform Client SDK — silent hidden-iframe OAuth, no page redirect) ──
+      // ── Auth — hidden iframe, no page redirect ────────────────────────────────
 
-    var platformClient = require('purecloud-platform-client-v2');
-    var apiClient      = platformClient.ApiClient.instance;
-    var _token         = null;
-
-    apiClient.setEnvironment(platformClient.PureCloudRegionHosts.us_east_1);
-    apiClient.setPersistSettings(true, 'training_app');
-
-    // Kick off auth immediately on load — resolves from localStorage if token is still valid,
-    // otherwise does the OAuth exchange in a hidden iframe (user never sees a redirect).
-    apiClient.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
-      .then(function(data) { _token = data.accessToken; })
-      .catch(function(e)   { console.error('GC auth failed', e); });
-
-    function getToken() { return _token; }
-
-    // ── API ───────────────────────────────────────────────────────────────────
-
-    async function gcFetch(path, opts) {
-      opts = opts || {};
-      var tok = getToken();
-      if (!tok) throw new Error('Not authenticated');
-      var res = await fetch(API_BASE + path, Object.assign({}, opts, {
-        headers: Object.assign({
-          'Authorization': 'Bearer ' + tok,
-          'Content-Type':  'application/json'
-        }, opts.headers || {})
-      }));
-      if (!res.ok) {
-        var msg = 'HTTP ' + res.status;
-        try { var j = await res.json(); msg = j.message || msg; } catch(e) {}
-        throw new Error(msg);
-      }
-      return res.json();
-    }
-
-    function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
-
-    // ── UI helpers ────────────────────────────────────────────────────────────
-
-    function setStatus(id, text, cls) {
-      var el = document.getElementById(id);
-      el.textContent = text;
-      el.className = 'qt-status' + (cls ? ' ' + cls : '');
-    }
-
-    function setBtnState(id, disabled, text) {
-      var btn = document.getElementById(id);
-      btn.disabled = disabled;
-      if (text) btn.textContent = text;
-    }
-
-    function selectVoice(n) {
-      voiceScenario = n;
-      document.querySelectorAll('#voice-pills .qt-pill').forEach(function(b, i) {
-        b.className = 'qt-pill' + (i + 1 === n ? ' sel-voice' : '');
-      });
-    }
-
-    function selectEmail(n) {
-      emailScenario = n;
-      document.querySelectorAll('#email-pills .qt-pill').forEach(function(b, i) {
-        b.className = 'qt-pill' + (i + 1 === n ? ' sel-email' : '');
-      });
-    }
-
-    // ── Voice test ────────────────────────────────────────────────────────────
-
-    async function launchVoiceTest() {
-      if (!getToken()) {
-        setStatus('voice-status', 'Authenticating with Genesys...', 'loading');
-        try { var d = await apiClient.loginImplicitGrant(CLIENT_ID, REDIRECT_URI); _token = d.accessToken; }
-        catch(e) { setStatus('voice-status', 'Auth failed: ' + e.message, 'err'); return; }
+      function getStoredToken() {
+        try {
+          var d = JSON.parse(localStorage.getItem('gc_tok_training') || 'null');
+          if (d && d.t && Date.now() < d.e - 60000) return d.t;
+        } catch(e) {}
+        return null;
       }
 
-      var scenario = voiceScenario;
-      setBtnState('voice-btn', true, '⏳ Dialing...');
-      setStatus('voice-status', 'Placing call to ' + VOICE_NUMBER + '...', 'loading');
+      function doHiddenAuth() {
+        if (_authInFlight) return _authInFlight;
+        _authInFlight = new Promise(function(resolve, reject) {
+          var params = new URLSearchParams({
+            response_type: 'token',
+            client_id:     CLIENT_ID,
+            redirect_uri:  REDIRECT_URI
+          });
+          var iframe = document.createElement('iframe');
+          iframe.style.cssText = 'position:absolute;width:1px;height:1px;border:none;opacity:0;pointer-events:none;left:-9999px;top:-9999px;';
+          iframe.src = 'https://login.mypurecloud.com/oauth/authorize?' + params.toString();
+          document.body.appendChild(iframe);
 
-      var conv;
-      try {
-        conv = await gcFetch('/api/v2/conversations/calls', {
-          method: 'POST',
-          body: JSON.stringify({ phoneNumber: VOICE_NUMBER })
+          function cleanup() {
+            window.removeEventListener('storage', onStorage);
+            clearTimeout(timer);
+            try { document.body.removeChild(iframe); } catch(e) {}
+            _authInFlight = null;
+          }
+
+          function onStorage(e) {
+            if (e.key === 'gc_tok_training' && e.newValue) {
+              try {
+                var d = JSON.parse(e.newValue);
+                if (d.t) { cleanup(); _token = d.t; resolve(_token); }
+              } catch(e2) {}
+            }
+          }
+
+          window.addEventListener('storage', onStorage);
+          var timer = setTimeout(function() {
+            cleanup();
+            reject(new Error('Auth timed out — please refresh and try again.'));
+          }, 15000);
         });
-      } catch(e) {
-        setStatus('voice-status', 'Failed to place call: ' + e.message, 'err');
-        setBtnState('voice-btn', false, '📞 Start Voice Test');
-        return;
+        return _authInFlight;
       }
 
-      var convId = conv.id;
-      setStatus('voice-status', 'Call placed — answer your Genesys station to connect as caller...', 'loading');
+      async function ensureAuth() {
+        if (_token) return;
+        var stored = getStoredToken();
+        if (stored) { _token = stored; return; }
+        _token = await doHiddenAuth();
+      }
 
-      // Poll until both legs connected (max 90s)
-      var agentPId = null;
-      var connected = false;
+      // Pre-auth silently on page load so token is ready before first button click
+      (async function() { try { await ensureAuth(); } catch(e) {} })();
 
-      for (var i = 0; i < 90; i++) {
-        await sleep(1000);
-        var conversation;
-        try { conversation = await gcFetch('/api/v2/conversations/' + convId); }
-        catch(e) { continue; }
+      // ── API ───────────────────────────────────────────────────────────────────
 
-        var parts = conversation.participants || [];
-        var agentP    = parts.find(function(p) { return p.purpose === 'agent'; });
-        var customerP = parts.find(function(p) { return p.purpose === 'customer'; });
+      async function gcFetch(path, opts) {
+        opts = opts || {};
+        var res = await fetch(API_BASE + path, Object.assign({}, opts, {
+          headers: Object.assign({
+            'Authorization': 'Bearer ' + _token,
+            'Content-Type':  'application/json'
+          }, opts.headers || {})
+        }));
+        if (!res.ok) {
+          var msg = 'HTTP ' + res.status;
+          try { var j = await res.json(); msg = j.message || msg; } catch(e) {}
+          throw new Error(msg);
+        }
+        return res.json();
+      }
 
-        if (agentP && agentP.id) agentPId = agentP.id;
+      function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
 
-        // Check for any disconnection before we connect
-        if (agentP && agentP.state === 'DISCONNECTED') {
-          setStatus('voice-status', 'Call ended before connecting to IVR.', 'err');
-          setBtnState('voice-btn', false, '📞 Start Voice Test');
+      // ── UI helpers ────────────────────────────────────────────────────────────
+
+      function setStatus(id, text, cls) {
+        var el = document.getElementById(id);
+        el.textContent = text;
+        el.className = 'qt-status' + (cls ? ' ' + cls : '');
+      }
+
+      function setBtnState(id, disabled, text) {
+        var btn = document.getElementById(id);
+        btn.disabled = disabled;
+        if (text) btn.innerHTML = text;
+      }
+
+      function selectVoice(n) {
+        voiceScenario = n;
+        document.querySelectorAll('#voice-pills .qt-pill').forEach(function(b, i) {
+          b.className = 'qt-pill' + (i + 1 === n ? ' sel-voice' : '');
+        });
+      }
+
+      function selectChat(n) {
+        chatScenario = n;
+        document.querySelectorAll('#chat-pills .qt-pill').forEach(function(b, i) {
+          b.className = 'qt-pill' + (i + 1 === n ? ' sel-chat' : '');
+        });
+      }
+
+      function selectEmail(n) {
+        emailScenario = n;
+        document.querySelectorAll('#email-pills .qt-pill').forEach(function(b, i) {
+          b.className = 'qt-pill' + (i + 1 === n ? ' sel-email' : '');
+        });
+      }
+
+      // ── Chat test — opens widget + auto-sends scenario number ─────────────────
+
+      function launchChatTest() {
+        var scenario = chatScenario;
+        setStatus('chat-status', 'Opening chat widget...', 'loading');
+        setBtnState('chat-btn', true, '&#128172; Opening...');
+
+        Genesys('command', 'Messenger.open', {},
+          function() {
+            // Widget open — send the scenario number after brief delay
+            setTimeout(function() {
+              Genesys('command', 'MessagingService.sendMessage',
+                { message: String(scenario) },
+                function() {
+                  setStatus('chat-status', '✓ S' + scenario + ' — chat open and message sent. Accept in Genesys.', 'ok');
+                  setBtnState('chat-btn', false, '&#128172; Open Chat');
+                },
+                function() {
+                  // sendMessage not supported or session not ready — widget is open, hint the user
+                  setStatus('chat-status', 'Widget open — type ' + scenario + ' to start S' + scenario + '.', 'loading');
+                  setBtnState('chat-btn', false, '&#128172; Open Chat');
+                }
+              );
+            }, 600);
+          },
+          function(err) {
+            setStatus('chat-status', 'Could not open chat widget: ' + (err || 'unknown error'), 'err');
+            setBtnState('chat-btn', false, '&#128172; Open Chat');
+          }
+        );
+      }
+
+      // ── Voice test ────────────────────────────────────────────────────────────
+
+      async function launchVoiceTest() {
+        setBtnState('voice-btn', true, '&#9203; Connecting...');
+        try {
+          await ensureAuth();
+        } catch(e) {
+          setStatus('voice-status', 'Auth failed: ' + e.message, 'err');
+          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
           return;
         }
 
-        if (agentP  && agentP.state  === 'CONNECTED' &&
-            customerP && customerP.state === 'CONNECTED') {
-          connected = true;
-          break;
+        var scenario = voiceScenario;
+        setBtnState('voice-btn', true, '&#9203; Dialing...');
+        setStatus('voice-status', 'Placing call to ' + VOICE_NUMBER + '...', 'loading');
+
+        var conv;
+        try {
+          conv = await gcFetch('/api/v2/conversations/calls', {
+            method: 'POST',
+            body: JSON.stringify({ phoneNumber: VOICE_NUMBER })
+          });
+        } catch(e) {
+          setStatus('voice-status', 'Failed to place call: ' + e.message, 'err');
+          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          return;
         }
+
+        var convId = conv.id;
+        setStatus('voice-status', 'Call placed — answer your Genesys station to connect as caller...', 'loading');
+
+        var agentPId = null;
+        var connected = false;
+        for (var i = 0; i < 90; i++) {
+          await sleep(1000);
+          var conversation;
+          try { conversation = await gcFetch('/api/v2/conversations/' + convId); } catch(e) { continue; }
+
+          var parts     = conversation.participants || [];
+          var agentP    = parts.find(function(p) { return p.purpose === 'agent'; });
+          var customerP = parts.find(function(p) { return p.purpose === 'customer'; });
+
+          if (agentP && agentP.id) agentPId = agentP.id;
+
+          if (agentP && agentP.state === 'DISCONNECTED') {
+            setStatus('voice-status', 'Call ended before connecting to IVR.', 'err');
+            setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+            return;
+          }
+          if (agentP && agentP.state === 'CONNECTED' && customerP && customerP.state === 'CONNECTED') {
+            connected = true; break;
+          }
+        }
+
+        if (!connected || !agentPId) {
+          setStatus('voice-status', 'Timed out waiting for IVR connection. Is your station configured?', 'err');
+          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          return;
+        }
+
+        setStatus('voice-status', 'Connected — waiting for IVR greeting, then sending DTMF ' + scenario + '...', 'loading');
+        await sleep(4000);
+
+        try {
+          await gcFetch('/api/v2/conversations/' + convId + '/participants/' + agentPId + '/digits', {
+            method: 'POST',
+            body: JSON.stringify({ digits: String(scenario) })
+          });
+        } catch(e) {
+          setStatus('voice-status', 'DTMF send failed: ' + e.message, 'err');
+          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          return;
+        }
+
+        setStatus('voice-status', '✓ DTMF ' + scenario + ' sent — S' + scenario + ' call routing to queue. Have trainee accept in Genesys.', 'ok');
+        setBtnState('voice-btn', false, '&#128222; Start Voice Test');
       }
 
-      if (!connected || !agentPId) {
-        setStatus('voice-status', 'Timed out waiting for IVR connection. Is your station configured?', 'err');
-        setBtnState('voice-btn', false, '📞 Start Voice Test');
-        return;
+      // ── Email test ────────────────────────────────────────────────────────────
+
+      async function launchEmailTest() {
+        setBtnState('email-btn', true, '&#9203; Connecting...');
+        try {
+          await ensureAuth();
+        } catch(e) {
+          setStatus('email-status', 'Auth failed: ' + e.message, 'err');
+          setBtnState('email-btn', false, '&#9993; Send Test Email');
+          return;
+        }
+
+        var scenario = emailScenario;
+        var s = SCENARIOS[scenario];
+        setBtnState('email-btn', true, '&#9203; Sending...');
+        setStatus('email-status', 'Creating email interaction...', 'loading');
+
+        try {
+          await gcFetch('/api/v2/conversations/emails', {
+            method: 'POST',
+            body: JSON.stringify({
+              queueId:     EMAIL_QUEUE,
+              provider:    'training-app',
+              direction:   'INBOUND',
+              subject:     'Training ' + s.subjectKey + ' — ' + s.label,
+              fromAddress: 'training-test@example.com',
+              fromName:    'Training Test',
+              attributes:  s.attrs
+            })
+          });
+        } catch(e) {
+          setStatus('email-status', 'Failed: ' + e.message, 'err');
+          setBtnState('email-btn', false, '&#9993; Send Test Email');
+          return;
+        }
+
+        setStatus('email-status', '✓ S' + scenario + ' email in queue — check Training - Email in Genesys.', 'ok');
+        setBtnState('email-btn', false, '&#9993; Send Test Email');
       }
 
-      setStatus('voice-status', 'Connected to IVR — waiting for greeting, then sending DTMF ' + scenario + '...', 'loading');
-      await sleep(4000); // wait for IVR greeting to play
-
-      try {
-        await gcFetch('/api/v2/conversations/' + convId + '/participants/' + agentPId + '/digits', {
-          method: 'POST',
-          body: JSON.stringify({ digits: String(scenario) })
-        });
-      } catch(e) {
-        setStatus('voice-status', 'DTMF send failed: ' + e.message, 'err');
-        setBtnState('voice-btn', false, '📞 Start Voice Test');
-        return;
-      }
-
-      setStatus('voice-status', '✓ DTMF ' + scenario + ' sent — S' + scenario + ' call is routing to queue. Have trainee accept it in Genesys.', 'ok');
-      setBtnState('voice-btn', false, '📞 Start Voice Test');
-    }
-
-    // ── Email test ────────────────────────────────────────────────────────────
-
-    async function launchEmailTest() {
-      if (!getToken()) {
-        setStatus('email-status', 'Authenticating with Genesys...', 'loading');
-        try { var d = await apiClient.loginImplicitGrant(CLIENT_ID, REDIRECT_URI); _token = d.accessToken; }
-        catch(e) { setStatus('email-status', 'Auth failed: ' + e.message, 'err'); return; }
-      }
-
-      var scenario = emailScenario;
-      var s = SCENARIOS[scenario];
-
-      setBtnState('email-btn', true, '⏳ Sending...');
-      setStatus('email-status', 'Creating email interaction...', 'loading');
-
-      try {
-        await gcFetch('/api/v2/conversations/emails', {
-          method: 'POST',
-          body: JSON.stringify({
-            queueId:     EMAIL_QUEUE,
-            provider:    'training-app',
-            direction:   'INBOUND',
-            subject:     'Training ' + s.subjectKey + ' — ' + s.label,
-            fromAddress: 'training-test@example.com',
-            fromName:    'Training Test',
-            attributes:  s.attrs
-          })
-        });
-      } catch(e) {
-        setStatus('email-status', 'Failed: ' + e.message, 'err');
-        setBtnState('email-btn', false, '✉ Send Test Email');
-        return;
-      }
-
-      setStatus('email-status', '✓ S' + scenario + ' email in queue — check Training - Email in Genesys.', 'ok');
-      setBtnState('email-btn', false, '✉ Send Test Email');
-    }
+    } // end if (!window._GC_IS_OAUTH_CB)
   </script>
 </body>
 </html>
