@@ -12,21 +12,6 @@
         // cross-origin iframe throws here — that's fine, means we're iframed
       }
     })();
-
-    // OAuth callback handler — runs before page renders so token is available immediately
-    (function() {
-      var hash = window.location.hash;
-      if (hash.indexOf('access_token=') !== -1) {
-        var p = new URLSearchParams(hash.slice(1));
-        var tok = p.get('access_token');
-        var exp = p.get('expires_in') || '86400';
-        if (tok) {
-          sessionStorage.setItem('gc_tok', tok);
-          sessionStorage.setItem('gc_tok_exp', String(Date.now() + parseInt(exp) * 1000));
-          history.replaceState(null, '', window.location.pathname);
-        }
-      }
-    })();
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -411,11 +396,14 @@
     });
   </script>
 
+  <!-- Platform Client SDK (handles silent OAuth via hidden iframe — no page redirect) -->
+  <script src="https://unpkg.com/purecloud-platform-client-v2@239.0.0/dist/web-cjs/bundle.js"></script>
+
   <!-- Quick Test Logic -->
   <script>
-    var CLIENT_ID   = 'acf84405-def0-4e4e-96dc-53eecf6b15b0';
+    var CLIENT_ID    = 'acf84405-def0-4e4e-96dc-53eecf6b15b0';
     var REDIRECT_URI = 'https://aspechaupgrade.github.io/ops-training/';
-    var API_BASE    = 'https://api.mypurecloud.com';
+    var API_BASE     = 'https://api.mypurecloud.com';
     var EMAIL_QUEUE  = 'ff9f0acd-8573-4b19-8142-07bf807ca93a';
     var VOICE_NUMBER = '+12132240991';
 
@@ -478,22 +466,22 @@
     var voiceScenario = 1;
     var emailScenario = 1;
 
-    // ── Auth ──────────────────────────────────────────────────────────────────
+    // ── Auth (Platform Client SDK — silent hidden-iframe OAuth, no page redirect) ──
 
-    function getToken() {
-      var tok = sessionStorage.getItem('gc_tok');
-      var exp = parseInt(sessionStorage.getItem('gc_tok_exp') || '0');
-      return (tok && Date.now() < exp) ? tok : null;
-    }
+    var platformClient = require('purecloud-platform-client-v2');
+    var apiClient      = platformClient.ApiClient.instance;
+    var _token         = null;
 
-    function authenticate() {
-      var params = new URLSearchParams({
-        response_type: 'token',
-        client_id:     CLIENT_ID,
-        redirect_uri:  REDIRECT_URI
-      });
-      window.location.href = 'https://login.mypurecloud.com/oauth/authorize?' + params.toString();
-    }
+    apiClient.setEnvironment(platformClient.PureCloudRegionHosts.us_east_1);
+    apiClient.setPersistSettings(true, 'training_app');
+
+    // Kick off auth immediately on load — resolves from localStorage if token is still valid,
+    // otherwise does the OAuth exchange in a hidden iframe (user never sees a redirect).
+    apiClient.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
+      .then(function(data) { _token = data.accessToken; })
+      .catch(function(e)   { console.error('GC auth failed', e); });
+
+    function getToken() { return _token; }
 
     // ── API ───────────────────────────────────────────────────────────────────
 
@@ -548,7 +536,11 @@
     // ── Voice test ────────────────────────────────────────────────────────────
 
     async function launchVoiceTest() {
-      if (!getToken()) { authenticate(); return; }
+      if (!getToken()) {
+        setStatus('voice-status', 'Authenticating with Genesys...', 'loading');
+        try { var d = await apiClient.loginImplicitGrant(CLIENT_ID, REDIRECT_URI); _token = d.accessToken; }
+        catch(e) { setStatus('voice-status', 'Auth failed: ' + e.message, 'err'); return; }
+      }
 
       var scenario = voiceScenario;
       setBtnState('voice-btn', true, '⏳ Dialing...');
@@ -626,7 +618,11 @@
     // ── Email test ────────────────────────────────────────────────────────────
 
     async function launchEmailTest() {
-      if (!getToken()) { authenticate(); return; }
+      if (!getToken()) {
+        setStatus('email-status', 'Authenticating with Genesys...', 'loading');
+        try { var d = await apiClient.loginImplicitGrant(CLIENT_ID, REDIRECT_URI); _token = d.accessToken; }
+        catch(e) { setStatus('email-status', 'Auth failed: ' + e.message, 'err'); return; }
+      }
 
       var scenario = emailScenario;
       var s = SCENARIOS[scenario];
