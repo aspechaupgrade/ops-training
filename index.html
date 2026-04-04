@@ -12,21 +12,6 @@
       } catch(e) {}
     })();
 
-    // OAuth callback relay — hidden auth iframe lands here with #access_token
-    (function() {
-      var hash = window.location.hash;
-      if (hash && hash.indexOf('access_token=') !== -1) {
-        var p = new URLSearchParams(hash.slice(1));
-        var tok = p.get('access_token');
-        if (tok) {
-          var exp = parseInt(p.get('expires_in') || '86400', 10);
-          localStorage.setItem('gc_tok_training', JSON.stringify({
-            t: tok, e: Date.now() + exp * 1000
-          }));
-        }
-        window.stop();
-      }
-    })();
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -182,6 +167,7 @@
       margin-top: 5px;
     }
   </style>
+  <script src="https://sdk-cdn.mypurecloud.com/javascript/239.0.0/purecloud-platform-client-v2.min.js"></script>
 </head>
 <body>
   <h1>Ops Training Sandbox</h1>
@@ -422,7 +408,7 @@
   <script>
       var CLIENT_ID    = 'acf84405-def0-4e4e-96dc-53eecf6b15b0';
       var REDIRECT_URI = 'https://aspechaupgrade.github.io/ops-training/';
-      var API_BASE     = 'https://api.mypurecloud.com';
+      var API_BASE     = 'https://api.usw2.pure.cloud';
       var EMAIL_QUEUE  = 'ff9f0acd-8573-4b19-8142-07bf807ca93a';
       var VOICE_NUMBER = '+12132240991';
 
@@ -464,68 +450,21 @@
       var voiceScenario = 1;
       var emailScenario = 1;
       var chatScenario  = 1;
-      var _token        = null;
-      var _authInFlight  = null;
+      var _token = null;
 
-      // ── Auth — hidden iframe OAuth (no visible redirect) ─────────────────────
-
-      function getStoredToken() {
-        try {
-          var d = JSON.parse(localStorage.getItem('gc_tok_training') || 'null');
-          if (d && d.t && Date.now() < d.e - 60000) return d.t;
-        } catch(e) {}
-        return null;
-      }
-
-      function doHiddenAuth() {
-        if (_authInFlight) return _authInFlight;
-        _authInFlight = new Promise(function(resolve, reject) {
-          var authUrl = 'https://login.mypurecloud.com/oauth/authorize?' +
-            new URLSearchParams({
-              response_type: 'token',
-              client_id:     CLIENT_ID,
-              redirect_uri:  REDIRECT_URI
-            }).toString();
-
-          var iframe = document.createElement('iframe');
-          iframe.style.cssText = 'position:absolute;width:1px;height:1px;border:none;opacity:0;pointer-events:none;left:-9999px;top:-9999px;';
-          iframe.src = authUrl;
-          document.body.appendChild(iframe);
-
-          function cleanup() {
-            window.removeEventListener('storage', onStorage);
-            clearTimeout(timer);
-            try { document.body.removeChild(iframe); } catch(e) {}
-            _authInFlight = null;
-          }
-
-          function onStorage(e) {
-            if (e.key === 'gc_tok_training' && e.newValue) {
-              try {
-                var d = JSON.parse(e.newValue);
-                if (d.t) { cleanup(); _token = d.t; resolve(); }
-              } catch(e2) {}
-            }
-          }
-
-          window.addEventListener('storage', onStorage);
-          var timer = setTimeout(function() {
-            cleanup();
-            reject(new Error('Auth timed out — reload the app and try again.'));
-          }, 15000);
-        });
-        return _authInFlight;
-      }
+      // ── Auth — SDK implicit grant, same pattern as Custom Inbox ──────────────
+      var _authReady = (function() {
+        var platformClient = require('platformClient');
+        var client = platformClient.ApiClient.instance;
+        client.setEnvironment(platformClient.PureCloudRegionHosts.us_west_2);
+        client.setPersistSettings(true, 'training_app');
+        return client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
+          .then(function(data) { _token = data.accessToken; });
+      })();
 
       async function ensureAuth() {
-        if (_token) return;
-        var stored = getStoredToken();
-        if (stored) { _token = stored; return; }
-        await doHiddenAuth();
+        await _authReady;
       }
-
-      // Pre-auth silently on page load
-      (async function() { try { await ensureAuth(); } catch(e) {} })();
 
       // ── API ───────────────────────────────────────────────────────────────────
 
