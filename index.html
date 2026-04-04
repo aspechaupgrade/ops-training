@@ -166,6 +166,24 @@
       color: #aaa;
       margin-top: 5px;
     }
+    /* ── Dev Log ── */
+    #dev-log {
+      display: none;
+      margin-top: 32px;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-family: monospace;
+      font-size: 12px;
+      max-height: 320px;
+      overflow-y: auto;
+    }
+    #dev-log .log-title { color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 8px; }
+    #dev-log .log-ok { color: #6a9955; }
+    #dev-log .log-err { color: #f44747; }
+    #dev-log .log-info { color: #569cd6; }
+    #dev-log .log-time { color: #666; }
   </style>
   <script src="https://sdk-cdn.mypurecloud.com/javascript/239.0.0/purecloud-platform-client-v2.min.js"></script>
 </head>
@@ -390,6 +408,8 @@
     </div>
   </div>
 
+  <div id="dev-log"><div class="log-title">Dev Log</div></div>
+
   <!-- Genesys Messenger Widget -->
   <script type="text/javascript" charset="utf-8">
     (function (g, e, n, es, ys) {
@@ -451,6 +471,19 @@
       var emailScenario = 1;
       var chatScenario  = 1;
       var _token = null;
+      var DEV_USER = 'cc55be1e-097c-4e1a-8a40-262a307e72ea';
+      var _isDev = false;
+
+      // ── Dev Log (visible only for DEV_USER) ──────────────────────────────────
+      function devLog(msg, cls) {
+        if (!_isDev) return;
+        var el = document.getElementById('dev-log');
+        var ts = new Date().toLocaleTimeString();
+        var line = document.createElement('div');
+        line.innerHTML = '<span class="log-time">' + ts + '</span> <span class="' + (cls || 'log-info') + '">' + msg + '</span>';
+        el.appendChild(line);
+        el.scrollTop = el.scrollHeight;
+      }
 
       // ── Auth — SDK implicit grant, same pattern as Custom Inbox ──────────────
       var _authReady = (function() {
@@ -459,7 +492,21 @@
         client.setEnvironment(platformClient.PureCloudRegionHosts.us_west_2);
         client.setPersistSettings(true, 'training_app');
         return client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
-          .then(function(data) { _token = data.accessToken; });
+          .then(function(data) {
+            _token = data.accessToken;
+            // Check if current user is dev — show log panel
+            fetch(API_BASE + '/api/v2/users/me', {
+              headers: { 'Authorization': 'Bearer ' + _token }
+            }).then(function(r) { return r.json(); }).then(function(me) {
+              if (me.id === DEV_USER) {
+                _isDev = true;
+                document.getElementById('dev-log').style.display = 'block';
+                devLog('Auth OK — token ends ...' + _token.slice(-8), 'log-ok');
+                devLog('User: ' + me.name + ' (' + me.id + ')', 'log-info');
+                devLog('Environment: ' + API_BASE, 'log-info');
+              }
+            }).catch(function() {});
+          });
       })();
 
       async function ensureAuth() {
@@ -470,18 +517,27 @@
 
       async function gcFetch(path, opts) {
         opts = opts || {};
+        var method = (opts.method || 'GET').toUpperCase();
+        devLog(method + ' ' + path, 'log-info');
+        if (opts.body) devLog('Body: ' + opts.body, 'log-info');
         var res = await fetch(API_BASE + path, Object.assign({}, opts, {
           headers: Object.assign({
             'Authorization': 'Bearer ' + _token,
             'Content-Type':  'application/json'
           }, opts.headers || {})
         }));
+        var bodyText = await res.text();
+        var bodyJson;
+        try { bodyJson = JSON.parse(bodyText); } catch(e) { bodyJson = null; }
         if (!res.ok) {
           var msg = 'HTTP ' + res.status;
-          try { var j = await res.json(); msg = j.message || msg; } catch(e) {}
+          if (bodyJson) msg = bodyJson.message || msg;
+          devLog('FAIL ' + res.status + ': ' + msg, 'log-err');
+          if (bodyJson) devLog('Response: ' + JSON.stringify(bodyJson).slice(0, 500), 'log-err');
           throw new Error(msg);
         }
-        return res.json();
+        devLog('OK ' + res.status, 'log-ok');
+        return bodyJson;
       }
 
       function sleep(ms) { return new Promise(function(r) { setTimeout(r, ms); }); }
@@ -658,7 +714,7 @@
               provider:    'training-app',
               direction:   'INBOUND',
               subject:     'Training ' + s.subjectKey + ' — ' + s.label,
-              fromAddress: 'training-test@example.com',
+              fromAddress: 'training-' + Date.now() + '@example.com',
               fromName:    'Training Test',
               attributes:  s.attrs
             })
