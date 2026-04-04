@@ -649,8 +649,8 @@
           try { conversation = await gcFetch('/api/v2/conversations/' + convId); } catch(e) { continue; }
 
           var parts     = conversation.participants || [];
-          var agentP    = parts.find(function(p) { return p.purpose === 'agent'; });
-          var customerP = parts.find(function(p) { return p.purpose === 'customer'; });
+          var agentP    = parts.find(function(p) { return p.purpose === 'user' || p.purpose === 'agent'; });
+          var customerP = parts.find(function(p) { return p.purpose === 'customer' || p.purpose === 'external'; });
 
           if (agentP && agentP.id) agentPId = agentP.id;
 
