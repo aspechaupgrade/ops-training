@@ -489,7 +489,7 @@
       var _authReady = (function() {
         var platformClient = require('platformClient');
         var client = platformClient.ApiClient.instance;
-        client.setEnvironment(platformClient.PureCloudRegionHosts.us_west_2);
+        client.setEnvironment(platformClient.PureCloudRegionHosts.us_east_1);
         client.setPersistSettings(true, 'training_app');
         return client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
           .then(function(data) {
