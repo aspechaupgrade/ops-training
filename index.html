@@ -2,16 +2,12 @@
 <html lang="en">
 <head>
   <script>
-    // Iframe guard
-    (function() {
-      try {
-        if (window.self === window.top) {
-          document.documentElement.innerHTML = "";
-          throw new Error("blocked");
-        }
-      } catch(e) {}
-    })();
-
+    // Iframe guard — halt everything if not in an iframe
+    if (window.self === window.top) {
+      document.write('<html><head></head><body></body></html>');
+      document.close();
+      window.stop();
+    }
   </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
