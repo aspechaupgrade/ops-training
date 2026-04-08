@@ -182,7 +182,6 @@
     #dev-log .log-time { color: #666; }
   </style>
   <script src="https://sdk-cdn.mypurecloud.com/javascript/239.0.0/purecloud-platform-client-v2.min.js"></script>
-  <script src="https://apps.mypurecloud.com/client-auth/genesys-cloud-client-auth.browser.min.js"></script>
 </head>
 <body>
   <h1>Ops Training Sandbox</h1>
@@ -482,66 +481,32 @@
         el.scrollTop = el.scrollHeight;
       }
 
-      // ── Auth — cached token on load, popup on first user click ──────────────
-      var _platformClient = require('platformClient');
-      var _client = _platformClient.ApiClient.instance;
-      _client.setEnvironment(_platformClient.PureCloudRegionHosts.us_west_2);
-
-      function _getAuthenticator() {
-        return window.GenesysCloudClientAuth.authenticatorFactory(CLIENT_ID, {
-          environment: 'usw2.pure.cloud',
-          persist: true,
-          storageKey: 'training_app_auth'
-        });
-      }
-
-      function _onToken(token) {
-        _token = token;
-        _client.setAccessToken(_token);
-        fetch(API_BASE + '/api/v2/users/me', {
-          headers: { 'Authorization': 'Bearer ' + _token }
-        }).then(function(r) { return r.json(); }).then(function(me) {
-          if (me.id === DEV_USER) {
-            _isDev = true;
-            document.getElementById('dev-log').style.display = 'block';
-            devLog('Auth OK — token ends ...' + _token.slice(-8), 'log-ok');
-            devLog('User: ' + me.name + ' (' + me.id + ')', 'log-info');
-          }
-        }).catch(function() {});
-      }
-
-      // Try cached token on page load (no popup)
-      (function() {
-        try {
-          var key = 'training_app_auth';
-          var raw = localStorage.getItem(key);
-          if (raw) {
-            var cached = JSON.parse(raw);
-            if (cached.accessToken && cached.tokenExpiryTime > Date.now()) {
-              _onToken(cached.accessToken);
-            }
-          }
-        } catch(e) {}
+      // ── Auth — SDK implicit grant ───────────────────────────────────────────
+      var _authReady = (function() {
+        var platformClient = require('platformClient');
+        var client = platformClient.ApiClient.instance;
+        client.setEnvironment(platformClient.PureCloudRegionHosts.us_west_2);
+        client.setPersistSettings(true, 'training_app');
+        return client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
+          .then(function(data) {
+            _token = data.accessToken;
+            // Check if current user is dev — show log panel
+            fetch(API_BASE + '/api/v2/users/me', {
+              headers: { 'Authorization': 'Bearer ' + _token }
+            }).then(function(r) { return r.json(); }).then(function(me) {
+              if (me.id === DEV_USER) {
+                _isDev = true;
+                document.getElementById('dev-log').style.display = 'block';
+                devLog('Auth OK — token ends ...' + _token.slice(-8), 'log-ok');
+                devLog('User: ' + me.name + ' (' + me.id + ')', 'log-info');
+                devLog('Environment: ' + API_BASE, 'log-info');
+              }
+            }).catch(function() {});
+          });
       })();
 
       async function ensureAuth() {
-        if (_token) {
-          // Verify token is still valid
-          try {
-            var res = await fetch(API_BASE + '/api/v2/users/me', {
-              headers: { 'Authorization': 'Bearer ' + _token }
-            });
-            if (res.ok) return;
-          } catch(e) {}
-          _token = null;
-        }
-        // No valid token — popup auth (called from button click = user gesture)
-        var data = await _getAuthenticator().loginImplicitGrant({
-          redirectUri: 'https://apps.usw2.pure.cloud/client-auth',
-          usePopupAuth: true,
-          popupTimeout: 30000
-        });
-        _onToken(data.accessToken);
+        await _authReady;
       }
 
       // ── API ───────────────────────────────────────────────────────────────────
