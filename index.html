@@ -277,9 +277,9 @@
       <div id="email-status" class="qt-status"></div>
       <div class="qt-hint">Creates an inbound email interaction directly in the Training - Email queue. No Gmail needed.</div>
 
-      <div id="bulk-email-section" style="display:none">
+      <div id="bulk-email-section">
         <hr class="qt-divider">
-        <div class="qt-label">Trainer Tools — Bulk Load</div>
+        <div class="qt-label">Bulk Load</div>
         <div class="qt-row">
           <label style="font-size:14px">Count
             <input id="bulk-count" type="number" min="1" max="25" value="10" style="width:60px;margin-left:6px;padding:4px 6px;border:1px solid #ccc;border-radius:4px">
@@ -287,7 +287,7 @@
           <button class="qt-action qt-action-email" id="bulk-btn" onclick="launchBulkEmail()">📧 Load Emails</button>
         </div>
         <div id="bulk-status" class="qt-status"></div>
-        <div class="qt-hint">Sends multiple test emails into Training - Email at once. Trainer-only.</div>
+        <div class="qt-hint">Sends multiple test emails into Training - Email at once.</div>
       </div>
 
       <table class="scenarios">
@@ -468,8 +468,6 @@
       var _token = null;
       var DEV_USER = 'cc55be1e-097c-4e1a-8a40-262a307e72ea';
       var _isDev = false;
-      var TRAINER_USERS = [DEV_USER]; // append additional trainer user IDs here
-      var _isTrainer = false;
 
       // ── Dev Log (visible only for DEV_USER) ──────────────────────────────────
       function devLog(msg, cls) {
@@ -500,11 +498,6 @@
                 devLog('Auth OK — token ends ...' + _token.slice(-8), 'log-ok');
                 devLog('User: ' + me.name + ' (' + me.id + ')', 'log-info');
                 devLog('Environment: ' + API_BASE, 'log-info');
-              }
-              if (TRAINER_USERS.indexOf(me.id) !== -1) {
-                _isTrainer = true;
-                document.getElementById('bulk-email-section').style.display = 'block';
-                devLog('Trainer tools enabled', 'log-ok');
               }
             }).catch(function() {});
           });
@@ -703,7 +696,6 @@
       // ── Bulk Email Loader (trainer-only) ──────────────────────────────────────
 
       async function launchBulkEmail() {
-        if (!_isTrainer) return;
         await ensureAuth();
         var count = parseInt(document.getElementById('bulk-count').value, 10) || 0;
         count = Math.max(1, Math.min(25, count));
