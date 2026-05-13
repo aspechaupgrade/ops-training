@@ -14,16 +14,49 @@
   <title>Ops Training Sandbox</title>
   <style>
     * { box-sizing: border-box; }
+    :root {
+      --upgrade-green: #0E680E;
+      --upgrade-green-darkest: #0a4007;
+      --upgrade-green-mid: #4A9D2D;
+      --upgrade-green-light: #70B864;
+      --upgrade-green-pale: #A7D3A0;
+      --upgrade-teal: #1fa4ad;
+      --upgrade-teal-pale: #b4e1e4;
+      --upgrade-text: #3A3B41;
+      --upgrade-text-mid: #686C78;
+      --upgrade-text-light: #8E919C;
+      --upgrade-bg-page: #EAECF0;
+      --upgrade-red: #B52518;
+    }
     body {
       font-family: Arial, sans-serif;
       max-width: 900px;
       margin: 40px auto;
       padding: 20px;
-      background: #f0f0f0;
-      color: #222;
+      background: var(--upgrade-bg-page);
+      color: var(--upgrade-text);
     }
-    h1 { color: #5D0085; margin-bottom: 4px; }
-    .subtitle { color: #666; margin-top: 0; margin-bottom: 32px; font-size: 15px; }
+    .brand-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 8px;
+    }
+    .brand-header img { height: 40px; width: auto; }
+    .brand-header .brand-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--upgrade-text-light);
+    }
+    h1 { color: var(--upgrade-green); margin: 0; }
+    .subtitle {
+      color: var(--upgrade-text-mid);
+      margin-top: 0;
+      margin-bottom: 32px;
+      font-size: 15px;
+      text-align: center;
+    }
     .channel-card {
       background: white;
       border-radius: 8px;
@@ -40,9 +73,9 @@
       align-items: center;
       gap: 10px;
     }
-    .voice-header { background: #0E680E; }
-    .chat-header  { background: #FFBF00; color: #222; }
-    .email-header { background: #1a3c6e; }
+    .voice-header { background: var(--upgrade-green); }
+    .chat-header  { background: var(--upgrade-green-mid); }
+    .email-header { background: var(--upgrade-green-darkest); }
     .channel-body { padding: 20px; }
     .steps { margin: 0; padding-left: 20px; line-height: 2; }
     .scenarios {
@@ -71,25 +104,17 @@
       font-weight: bold;
       color: white;
     }
-    .badge-green { background: #0E680E; }
-    .badge-red   { background: #B52518; }
+    .badge-green { background: var(--upgrade-green); }
+    .badge-teal  { background: var(--upgrade-teal); }
+    .badge-red   { background: var(--upgrade-red); }
     .note {
-      background: #fff8e1;
-      border-left: 4px solid #f0a500;
+      background: var(--upgrade-green-pale);
+      border-left: 4px solid var(--upgrade-green);
       padding: 12px 16px;
       margin-top: 16px;
       font-size: 14px;
       border-radius: 0 4px 4px 0;
     }
-    .contact-info {
-      background: #e8f0fe;
-      border-left: 4px solid #1a73e8;
-      padding: 12px 16px;
-      margin-bottom: 24px;
-      font-size: 14px;
-      border-radius: 0 4px 4px 0;
-    }
-    .contact-info strong { display: block; margin-bottom: 4px; }
     code {
       background: #f5f5f5;
       padding: 2px 6px;
@@ -122,7 +147,7 @@
     .qt-pill {
       border: 2px solid #ddd;
       background: white;
-      color: #666;
+      color: var(--upgrade-text-mid);
       padding: 4px 13px;
       border-radius: 20px;
       cursor: pointer;
@@ -131,9 +156,7 @@
       transition: all 0.12s;
     }
     .qt-pill:hover { border-color: #bbb; color: #333; }
-    .qt-pill.sel-voice { border-color: #0E680E; background: #0E680E; color: white; }
-    .qt-pill.sel-chat  { border-color: #c49a00; background: #FFBF00; color: #222; }
-    .qt-pill.sel-email { border-color: #1a3c6e; background: #1a3c6e; color: white; }
+    .qt-pill.sel-voice { border-color: var(--upgrade-green); background: var(--upgrade-green); color: white; }
     .qt-action {
       padding: 6px 18px;
       border: none;
@@ -142,21 +165,27 @@
       font-weight: bold;
       font-size: 13px;
       cursor: pointer;
-      transition: opacity 0.15s;
+      transition: filter 0.12s, box-shadow 0.12s;
     }
-    .qt-action:hover:not(:disabled) { opacity: 0.88; }
+    .qt-action:hover:not(:disabled) {
+      filter: brightness(1.12);
+      box-shadow: inset 0 0 0 999px rgba(255,255,255,0.08);
+    }
+    .qt-action:active:not(:disabled) {
+      filter: brightness(0.95);
+    }
     .qt-action:disabled { opacity: 0.45; cursor: not-allowed; }
-    .qt-action-voice { background: #0E680E; }
-    .qt-action-chat  { background: #FFBF00; color: #222; }
-    .qt-action-email { background: #1a3c6e; }
+    .qt-action-voice { background: var(--upgrade-green); }
+    .qt-action-chat  { background: var(--upgrade-green-mid); }
+    .qt-action-email { background: var(--upgrade-green-darkest); }
     .qt-status {
       margin-top: 8px;
       font-size: 13px;
       min-height: 18px;
     }
-    .qt-status.loading { color: #888; }
-    .qt-status.ok  { color: #0E680E; font-weight: bold; }
-    .qt-status.err { color: #B52518; }
+    .qt-status.loading { color: var(--upgrade-text-mid); }
+    .qt-status.ok  { color: var(--upgrade-green); font-weight: bold; }
+    .qt-status.err { color: var(--upgrade-red); }
     .qt-hint {
       font-size: 12px;
       color: #aaa;
@@ -179,13 +208,17 @@
     #dev-log .log-ok { color: #6a9955; }
     #dev-log .log-err { color: #f44747; }
     #dev-log .log-info { color: #569cd6; }
-    #dev-log .log-time { color: #666; }
+    #dev-log .log-time { color: var(--upgrade-text-mid); }
   </style>
   <script src="https://sdk-cdn.mypurecloud.com/javascript/239.0.0/purecloud-platform-client-v2.min.js"></script>
 </head>
 <body>
-  <h1>Ops Training Sandbox</h1>
-  <p class="subtitle">Scenario-based training environment — each channel routes to a configurable screen pop</p>
+  <div class="brand-header">
+    <img src="upgradeLogo.png" alt="Upgrade">
+    <div class="brand-divider"></div>
+    <h1>Ops Training Sandbox</h1>
+  </div>
+  <p class="subtitle">Scenario-based training environment, each channel routes to a configurable screen pop</p>
 
   <!-- CHAT -->
   <div class="channel-card">
@@ -195,16 +228,10 @@
     <div class="channel-body">
       <div class="qt-label">Quick Test</div>
       <div class="qt-row">
-        <div class="qt-pills" id="chat-pills">
-          <button class="qt-pill sel-chat" onclick="selectChat(1)">S1</button>
-          <button class="qt-pill" onclick="selectChat(2)">S2</button>
-          <button class="qt-pill" onclick="selectChat(3)">S3</button>
-          <button class="qt-pill" onclick="selectChat(4)">S4</button>
-        </div>
         <button class="qt-action qt-action-chat" id="chat-btn" onclick="launchChatTest()">&#128172; Open Chat</button>
       </div>
       <div id="chat-status" class="qt-status"></div>
-      <div class="qt-hint">Opens the chat widget and sends your scenario number automatically — no typing needed.</div>
+      <div class="qt-hint">Opens the chat widget. The flow injects a fixed test customer so the screen pop always shows the same data.</div>
       <table class="scenarios">
         <thead>
           <tr>
@@ -213,36 +240,17 @@
             <th>Theme</th>
             <th>Auth</th>
             <th>Account ID</th>
+            <th>Customer</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td><strong>1</strong></td>
-            <td>Authenticated Premium Customer</td>
-            <td><span class="badge badge-green">Green</span></td>
+            <td>(any)</td>
+            <td>Generic test customer</td>
+            <td><span class="badge badge-teal">Teal</span></td>
             <td>Authenticated</td>
             <td>123456789</td>
-          </tr>
-          <tr>
-            <td><strong>2</strong></td>
-            <td>Unauthenticated / Multiple Accounts</td>
-            <td><span class="badge badge-red">Red</span></td>
-            <td>Auth Failed</td>
-            <td>Multiple</td>
-          </tr>
-          <tr>
-            <td><strong>3</strong></td>
-            <td>Collections (Mini Miranda)</td>
-            <td><span class="badge badge-green">Green</span></td>
-            <td>Authenticated</td>
-            <td>987654321</td>
-          </tr>
-          <tr>
-            <td><strong>4</strong></td>
-            <td>Offer Page</td>
-            <td><span class="badge badge-red">Red</span></td>
-            <td>Auth Failed</td>
-            <td>No open accounts</td>
+            <td>Michael Johnson</td>
           </tr>
         </tbody>
       </table>
@@ -250,8 +258,64 @@
       <div class="qt-label">Manual Steps</div>
       <ol class="steps">
         <li>Click the chat widget in the <strong>bottom-right corner</strong> of this page</li>
-        <li>Send <strong>1, 2, 3, or 4</strong> as your opening message to select your scenario</li>
+        <li>Send any opening message</li>
         <li>Accept the chat in Genesys Cloud and verify the screen pop</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- EMAIL -->
+  <div class="channel-card">
+    <div class="channel-header email-header">
+      <span>📧</span> Email
+    </div>
+    <div class="channel-body">
+      <div class="qt-label">Quick Test</div>
+      <div class="qt-row">
+        <button class="qt-action qt-action-email" id="email-btn" onclick="launchEmailTest()">📧 Send Test Email</button>
+      </div>
+      <div id="email-status" class="qt-status"></div>
+      <div class="qt-hint">Creates an inbound email interaction directly in the Training - Email queue. No Gmail needed.</div>
+
+      <div id="bulk-email-section" style="display:none">
+        <hr class="qt-divider">
+        <div class="qt-label">Trainer Tools — Bulk Load</div>
+        <div class="qt-row">
+          <label style="font-size:14px">Count
+            <input id="bulk-count" type="number" min="1" max="25" value="10" style="width:60px;margin-left:6px;padding:4px 6px;border:1px solid #ccc;border-radius:4px">
+          </label>
+          <button class="qt-action qt-action-email" id="bulk-btn" onclick="launchBulkEmail()">📧 Load Emails</button>
+        </div>
+        <div id="bulk-status" class="qt-status"></div>
+        <div class="qt-hint">Sends multiple test emails into Training - Email at once. Trainer-only.</div>
+      </div>
+
+      <table class="scenarios">
+        <thead>
+          <tr>
+            <th>Subject keyword</th>
+            <th>Scenario</th>
+            <th>Theme</th>
+            <th>Auth</th>
+            <th>Account ID</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>(any)</td>
+            <td>Generic</td>
+            <td><span class="badge badge-teal">Teal</span></td>
+            <td>N/A</td>
+            <td>N/A</td>
+          </tr>
+        </tbody>
+      </table>
+      <hr class="qt-divider">
+      <div class="qt-label">Manual Steps</div>
+      <ol class="steps">
+        <li>Send an email to <code>OpsTraining@upgrade.pure.cloud</code></li>
+        <li>Subject and body content do not matter, the flow routes everything to one screen pop</li>
+        <li>Accept the email in Genesys Cloud and verify the screen pop</li>
       </ol>
     </div>
   </div>
@@ -259,7 +323,7 @@
   <!-- VOICE -->
   <div class="channel-card">
     <div class="channel-header voice-header">
-      <span>&#128222;</span> Voice
+      <span>☎️</span> Voice
     </div>
     <div class="channel-body">
       <div class="qt-label">Quick Test</div>
@@ -270,7 +334,7 @@
           <button class="qt-pill" onclick="selectVoice(3)">S3</button>
           <button class="qt-pill" onclick="selectVoice(4)">S4</button>
         </div>
-        <button class="qt-action qt-action-voice" id="voice-btn" onclick="launchVoiceTest()">&#128222; Start Voice Test</button>
+        <button class="qt-action qt-action-voice" id="voice-btn" onclick="launchVoiceTest()">☎️ Start Voice Test</button>
       </div>
       <div id="voice-status" class="qt-status"></div>
       <div class="qt-hint">Your Genesys station dials the training number &amp; sends DTMF automatically. Have a trainee accept the call from the queue.</div>
@@ -331,79 +395,6 @@
     </div>
   </div>
 
-  <!-- EMAIL -->
-  <div class="channel-card">
-    <div class="channel-header email-header">
-      <span>&#9993;</span> Email
-    </div>
-    <div class="channel-body">
-      <div class="qt-label">Quick Test</div>
-      <div class="qt-row">
-        <div class="qt-pills" id="email-pills">
-          <button class="qt-pill sel-email" onclick="selectEmail(1)">S1</button>
-          <button class="qt-pill" onclick="selectEmail(2)">S2</button>
-          <button class="qt-pill" onclick="selectEmail(3)">S3</button>
-          <button class="qt-pill" onclick="selectEmail(4)">S4</button>
-        </div>
-        <button class="qt-action qt-action-email" id="email-btn" onclick="launchEmailTest()">&#9993; Send Test Email</button>
-      </div>
-      <div id="email-status" class="qt-status"></div>
-      <div class="qt-hint">Creates an inbound email interaction directly in the Training - Email queue. No Gmail needed.</div>
-      <table class="scenarios">
-        <thead>
-          <tr>
-            <th>Subject keyword</th>
-            <th>Scenario</th>
-            <th>Theme</th>
-            <th>Auth</th>
-            <th>Account ID</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><code>S1</code></td>
-            <td>Authenticated Premium Customer</td>
-            <td><span class="badge badge-green">Green</span></td>
-            <td>Authenticated</td>
-            <td>123456789</td>
-          </tr>
-          <tr>
-            <td><code>S2</code></td>
-            <td>Unauthenticated / Multiple Accounts</td>
-            <td><span class="badge badge-red">Red</span></td>
-            <td>Auth Failed</td>
-            <td>Multiple</td>
-          </tr>
-          <tr>
-            <td><code>S3</code></td>
-            <td>Collections (Mini Miranda)</td>
-            <td><span class="badge badge-green">Green</span></td>
-            <td>Authenticated</td>
-            <td>987654321</td>
-          </tr>
-          <tr>
-            <td><code>S4</code></td>
-            <td>Offer Page</td>
-            <td><span class="badge badge-red">Red</span></td>
-            <td>Auth Failed</td>
-            <td>No open accounts</td>
-          </tr>
-        </tbody>
-      </table>
-      <hr class="qt-divider">
-      <div class="qt-label">Manual Steps</div>
-      <ol class="steps">
-        <li>Send an email to <code>OpsTraining@upgrade.pure.cloud</code></li>
-        <li>Include <strong>S1, S2, S3, or S4</strong> anywhere in the subject line</li>
-        <li>Body content doesn't matter — the flow reads the subject only</li>
-        <li>Accept the email in Genesys Cloud and verify the screen pop</li>
-      </ol>
-      <div class="note">
-        Example subjects: <code>Training S1</code> &nbsp;|&nbsp; <code>[S2] test run</code> &nbsp;|&nbsp; <code>S3 - collections scenario</code>
-      </div>
-    </div>
-  </div>
-
   <div id="dev-log"><div class="log-title">Dev Log</div></div>
 
   <!-- Genesys Messenger Widget -->
@@ -428,9 +419,10 @@
       var EMAIL_QUEUE  = 'ff9f0acd-8573-4b19-8142-07bf807ca93a';
       var VOICE_NUMBER = '+12132240991';
 
-      var SCENARIOS = {
+      // Voice scenarios — 4-way DTMF selection drives screen pop
+      var VOICE_SCENARIOS = {
         1: {
-          label: 'Auth Premium Customer', subjectKey: 'S1',
+          label: 'Auth Premium Customer',
           attrs: {
             callerAccountID: '123456789', callerAuthenticated: 'true', targetAccount: '123456789',
             callerVQLink: 'https://appbyphoneui.usw2.prod.upgrade.com/app-by-phone/application/123456789/personal-info',
@@ -438,7 +430,7 @@
           }
         },
         2: {
-          label: 'Unauth / Multiple Accounts', subjectKey: 'S2',
+          label: 'Unauth / Multiple Accounts',
           attrs: {
             callerAccountID: 'Multiple', callerAuthenticated: 'false', targetAccount: '',
             callerVQLink: '', primaryBackgroundColor: '#B52518', secondaryBackgroundColor: '#FBEAE9',
@@ -446,7 +438,7 @@
           }
         },
         3: {
-          label: 'Collections (Mini Miranda)', subjectKey: 'S3',
+          label: 'Collections (Mini Miranda)',
           attrs: {
             callerAccountID: '987654321', callerAuthenticated: 'true', targetAccount: '987654321',
             callerVQLink: 'https://appbyphoneui.usw2.prod.upgrade.com/app-by-phone/application/987654321/personal-info',
@@ -454,7 +446,7 @@
           }
         },
         4: {
-          label: 'Offer Page', subjectKey: 'S4',
+          label: 'Offer Page',
           attrs: {
             callerAccountID: 'No open accounts', callerAuthenticated: 'false', targetAccount: '',
             callerVQLink: '', primaryBackgroundColor: '#B52518', secondaryBackgroundColor: '#FBEAE9',
@@ -463,12 +455,21 @@
         }
       };
 
+      // Single generic email payload — matches prod email flow (auth failed, teal)
+      var EMAIL_GENERIC_ATTRS = {
+        callerAccountID: '', callerAuthenticated: 'false', targetAccount: '',
+        callerVQLink: '',
+        primaryBackgroundColor: '#1fa4ad',
+        secondaryBackgroundColor: '#b4e1e4',
+        Authentication: 'Authentication Failed'
+      };
+
       var voiceScenario = 1;
-      var emailScenario = 1;
-      var chatScenario  = 1;
       var _token = null;
       var DEV_USER = 'cc55be1e-097c-4e1a-8a40-262a307e72ea';
       var _isDev = false;
+      var TRAINER_USERS = [DEV_USER]; // append additional trainer user IDs here
+      var _isTrainer = false;
 
       // ── Dev Log (visible only for DEV_USER) ──────────────────────────────────
       function devLog(msg, cls) {
@@ -490,7 +491,6 @@
         return client.loginImplicitGrant(CLIENT_ID, REDIRECT_URI)
           .then(function(data) {
             _token = data.accessToken;
-            // Check if current user is dev — show log panel
             fetch(API_BASE + '/api/v2/users/me', {
               headers: { 'Authorization': 'Bearer ' + _token }
             }).then(function(r) { return r.json(); }).then(function(me) {
@@ -500,6 +500,11 @@
                 devLog('Auth OK — token ends ...' + _token.slice(-8), 'log-ok');
                 devLog('User: ' + me.name + ' (' + me.id + ')', 'log-info');
                 devLog('Environment: ' + API_BASE, 'log-info');
+              }
+              if (TRAINER_USERS.indexOf(me.id) !== -1) {
+                _isTrainer = true;
+                document.getElementById('bulk-email-section').style.display = 'block';
+                devLog('Trainer tools enabled', 'log-ok');
               }
             }).catch(function() {});
           });
@@ -559,44 +564,16 @@
         });
       }
 
-      function selectChat(n) {
-        chatScenario = n;
-        document.querySelectorAll('#chat-pills .qt-pill').forEach(function(b, i) {
-          b.className = 'qt-pill' + (i + 1 === n ? ' sel-chat' : '');
-        });
-      }
-
-      function selectEmail(n) {
-        emailScenario = n;
-        document.querySelectorAll('#email-pills .qt-pill').forEach(function(b, i) {
-          b.className = 'qt-pill' + (i + 1 === n ? ' sel-email' : '');
-        });
-      }
-
-      // ── Chat test — opens widget + auto-sends scenario number ─────────────────
+      // ── Chat test — opens widget ──────────────────────────────────────────────
 
       function launchChatTest() {
-        var scenario = chatScenario;
         setStatus('chat-status', 'Opening chat widget...', 'loading');
         setBtnState('chat-btn', true, '&#128172; Opening...');
 
         Genesys('command', 'Messenger.open', {},
           function() {
-            // Widget open — send the scenario number after brief delay
-            setTimeout(function() {
-              Genesys('command', 'MessagingService.sendMessage',
-                { message: String(scenario) },
-                function() {
-                  setStatus('chat-status', '✓ S' + scenario + ' — chat open and message sent. Accept in Genesys.', 'ok');
-                  setBtnState('chat-btn', false, '&#128172; Open Chat');
-                },
-                function() {
-                  // sendMessage not supported or session not ready — widget is open, hint the user
-                  setStatus('chat-status', 'Widget open — type ' + scenario + ' to start S' + scenario + '.', 'loading');
-                  setBtnState('chat-btn', false, '&#128172; Open Chat');
-                }
-              );
-            }, 600);
+            setStatus('chat-status', '✓ Chat widget open — send any message and accept in Genesys.', 'ok');
+            setBtnState('chat-btn', false, '&#128172; Open Chat');
           },
           function(err) {
             setStatus('chat-status', 'Could not open chat widget: ' + (err || 'unknown error'), 'err');
@@ -614,7 +591,7 @@
           await ensureAuth();
         } catch(e) {
           setStatus('voice-status', 'Auth failed: ' + e.message, 'err');
-          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          setBtnState('voice-btn', false, '☎️ Start Voice Test');
           return;
         }
 
@@ -630,7 +607,7 @@
           });
         } catch(e) {
           setStatus('voice-status', 'Failed to place call: ' + e.message, 'err');
-          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          setBtnState('voice-btn', false, '☎️ Start Voice Test');
           return;
         }
 
@@ -652,7 +629,7 @@
 
           if (agentP && agentP.state === 'DISCONNECTED') {
             setStatus('voice-status', 'Call ended before connecting to IVR.', 'err');
-            setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+            setBtnState('voice-btn', false, '☎️ Start Voice Test');
             return;
           }
           if (agentP && agentP.state === 'CONNECTED' && customerP && customerP.state === 'CONNECTED') {
@@ -662,7 +639,7 @@
 
         if (!connected || !agentPId) {
           setStatus('voice-status', 'Timed out waiting for IVR connection. Is your station configured?', 'err');
-          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          setBtnState('voice-btn', false, '☎️ Start Voice Test');
           return;
         }
 
@@ -676,15 +653,15 @@
           });
         } catch(e) {
           setStatus('voice-status', 'DTMF send failed: ' + e.message, 'err');
-          setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+          setBtnState('voice-btn', false, '☎️ Start Voice Test');
           return;
         }
 
         setStatus('voice-status', '✓ DTMF ' + scenario + ' sent — S' + scenario + ' call routing to queue. Have trainee accept in Genesys.', 'ok');
-        setBtnState('voice-btn', false, '&#128222; Start Voice Test');
+        setBtnState('voice-btn', false, '☎️ Start Voice Test');
       }
 
-      // ── Email test ────────────────────────────────────────────────────────────
+      // ── Email test — single generic email ─────────────────────────────────────
 
       async function launchEmailTest() {
         setBtnState('email-btn', true, '&#9203; Connecting...');
@@ -693,12 +670,10 @@
           await ensureAuth();
         } catch(e) {
           setStatus('email-status', 'Auth failed: ' + e.message, 'err');
-          setBtnState('email-btn', false, '&#9993; Send Test Email');
+          setBtnState('email-btn', false, '📧 Send Test Email');
           return;
         }
 
-        var scenario = emailScenario;
-        var s = SCENARIOS[scenario];
         setBtnState('email-btn', true, '&#9203; Sending...');
         setStatus('email-status', 'Creating email interaction...', 'loading');
 
@@ -709,20 +684,61 @@
               queueId:     EMAIL_QUEUE,
               provider:    'training-app',
               direction:   'INBOUND',
-              subject:     'Training ' + s.subjectKey + ' — ' + s.label,
+              subject:     'Training Email - ' + new Date().toLocaleTimeString(),
               fromAddress: 'training-' + Date.now() + '@example.com',
               fromName:    'Training Test',
-              attributes:  s.attrs
+              attributes:  EMAIL_GENERIC_ATTRS
             })
           });
         } catch(e) {
           setStatus('email-status', 'Failed: ' + e.message, 'err');
-          setBtnState('email-btn', false, '&#9993; Send Test Email');
+          setBtnState('email-btn', false, '📧 Send Test Email');
           return;
         }
 
-        setStatus('email-status', '✓ S' + scenario + ' email in queue — check Training - Email in Genesys.', 'ok');
-        setBtnState('email-btn', false, '&#9993; Send Test Email');
+        setStatus('email-status', '✓ Email in queue — check Training - Email in Genesys.', 'ok');
+        setBtnState('email-btn', false, '📧 Send Test Email');
+      }
+
+      // ── Bulk Email Loader (trainer-only) ──────────────────────────────────────
+
+      async function launchBulkEmail() {
+        if (!_isTrainer) return;
+        await ensureAuth();
+        var count = parseInt(document.getElementById('bulk-count').value, 10) || 0;
+        count = Math.max(1, Math.min(25, count));
+        setBtnState('bulk-btn', true, '&#9203; 0/' + count + '...');
+        setStatus('bulk-status', 'Sending ' + count + ' emails...', 'loading');
+
+        var sent = 0, failed = 0;
+        for (var i = 0; i < count; i++) {
+          try {
+            await gcFetch('/api/v2/conversations/emails', {
+              method: 'POST',
+              body: JSON.stringify({
+                queueId:     EMAIL_QUEUE,
+                provider:    'training-app-bulk',
+                direction:   'INBOUND',
+                subject:     'Training Bulk ' + (i + 1) + '/' + count,
+                fromAddress: 'training-bulk-' + Date.now() + '-' + i + '@example.com',
+                fromName:    'Training Bulk Test',
+                attributes:  EMAIL_GENERIC_ATTRS
+              })
+            });
+            sent++;
+          } catch(e) {
+            failed++;
+          }
+          setBtnState('bulk-btn', true, '&#9203; ' + (i + 1) + '/' + count + '...');
+          if (i < count - 1) await sleep(250);
+        }
+
+        setBtnState('bulk-btn', false, '📧 Load Emails');
+        if (failed === 0) {
+          setStatus('bulk-status', '✓ Loaded ' + sent + ' emails into Training - Email queue.', 'ok');
+        } else {
+          setStatus('bulk-status', sent + ' sent, ' + failed + ' failed — check dev log.', 'err');
+        }
       }
 
   </script>
